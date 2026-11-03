@@ -1,0 +1,366 @@
+<%+header%>
+<div id="autologin-root">
+<link rel="stylesheet" href="<%=resource%>/portal.css?v=5">
+
+<div class="al-header">
+  <h2>Portal Manager</h2>
+  <p>Kelola autentikasi otomatis untuk multiple interface.</p>
+</div>
+
+<div class="al-tabs">
+  <button class="al-tab active" data-tab="konfigurasi">Auto Login</button>
+  <button class="al-tab" data-tab="about">About</button>
+</div>
+
+<div id="tab-konfigurasi" class="al-pane active">
+  <div class="al-card">
+    <h3 id="form-section-title" class="al-card-title">Konfigurasi Interface</h3>
+    <div class="al-scan-actions">
+      <button id="btn-add-profile" class="al-btn al-btn-add">
+        CEK INTERFACE
+      </button>
+      <span id="mac-spoof-badge" class="al-badge"></span>
+    </div>
+
+    <div id="scan-results">
+      <div id="scan-loading">
+        <span class="al-spinner"></span> Memindai interface...
+      </div>
+      <div id="scan-error"></div>
+      <div id="scan-table-container">
+        <div class="al-table-info">
+          <span id="scan-count"></span>
+        </div>
+        <div class="al-table-wrapper">
+          <table class="al-table" id="scan-table">
+            <thead>
+              <tr>
+                <th>PORTAL</th>
+                <th>INTERFACE</th>
+                <th>IP ADDRESS</th>
+                <th>MAC ADDRESS</th>
+                <th>URL PORTAL</th>
+                <th>STATUS</th>
+                <th>AKSI</th>
+              </tr>
+            </thead>
+            <tbody id="scan-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="al-profile-form">
+      <div class="al-form-grid">
+        <div class="al-form-group">
+          <label>PORTAL</label>
+          <input type="text" id="form-portal" class="al-input al-input-readonly" readonly>
+        </div>
+        <div class="al-form-group">
+          <label>INTERFACE</label>
+          <input type="text" id="form-interface" class="al-input al-input-readonly" readonly>
+        </div>
+      </div>
+      <div class="al-form-grid">
+        <div class="al-form-group">
+          <label>MAC ADDRESS</label>
+          <div class="al-input-group">
+            <input type="text" id="form-mac" class="al-input al-input-readonly" readonly>
+            <button type="button" id="btn-random-mac" class="al-btn">RANDOM MAC</button>
+          </div>
+        </div>
+        <div class="al-form-group">
+          <label>PERANGKAT</label>
+          <div class="al-input-group">
+            <select id="form-device-type" class="al-input">
+              <option value="Default">Default</option>
+              <option value="Android">Android</option>
+              <option value="MacOs">MacOs</option>
+              <option value="Linux">Linux</option>
+              <option value="Windows">Windows</option>
+            </select>
+            <button type="button" id="btn-apply-mac" class="al-btn al-btn-pilih">APPLY MAC</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="al-form-group">
+        <label>URL PORTAL</label>
+        <div class="al-input-group">
+          <input type="text" id="form-url-portal" class="al-input">
+          <button type="button" id="btn-detect-url" class="al-btn">DETECT URL</button>
+        </div>
+      </div>
+
+      <div id="portal-params-row">
+        <div class="al-params-grid">
+          <div class="al-params-item">
+            <label>GW ID</label>
+            <input type="text" id="form-gw_id" class="al-input al-input-readonly" readonly>
+          </div>
+          <div class="al-params-item">
+            <label>Client MAC</label>
+            <input type="text" id="form-client_mac" class="al-input al-input-readonly" readonly>
+          </div>
+          <div class="al-params-item">
+            <label>WLAN</label>
+            <input type="text" id="form-wlan" class="al-input al-input-readonly" readonly>
+          </div>
+          <div class="al-params-item">
+            <label>Session ID</label>
+            <input type="text" id="form-sessionid" class="al-input al-input-readonly" readonly>
+          </div>
+          <div class="al-params-item">
+            <label>IPC</label>
+            <input type="text" id="form-ipc" class="al-input al-input-readonly" readonly>
+          </div>
+        </div>
+      </div>
+	  
+      <div id="login-method-row">
+        <div class="al-form-group" id="login-method-main-group">
+          <label>LOGIN METHOD</label>
+          <select id="form-login-method" class="al-input">
+            <option value="">Pilih Metode Login</option>
+            <option value="standar">Standar</option>
+            <option value="komunitas">Komunitas</option>
+            <option value="isp">ISP</option>
+            <option value="wico">Wico</option>
+          </select>
+        </div>
+        <div class="al-form-group" id="login-method-extra-container">
+          <label id="login-method-extra-label"></label>
+          <select id="form-login-method-extra" class="al-input">
+          </select>
+        </div>
+      </div>
+      <div class="al-form-grid">
+        <div class="al-form-group">
+          <label>USERNAME</label>
+          <input type="text" id="form-username" class="al-input">
+        </div>
+        <div class="al-form-group">
+          <label>PASSWORD</label>
+          <input type="password" id="form-password" class="al-input">
+        </div>
+      </div>
+
+      <div id="advanced-settings-section">
+        <h3 class="al-card-title">Advanced Settings</h3>
+        <div class="al-advanced-grid">
+          <div class="al-advanced-item">
+            <div class="al-toggle-wrapper">
+              <label class="al-toggle">
+                <input type="checkbox" id="toggle-auto-login-reconnect">
+                <span class="al-toggle-slider"></span>
+              </label>
+              <span class="al-toggle-status" data-for="toggle-auto-login-reconnect">OFF</span>
+            </div>
+            <div class="al-advanced-label">Auto Login/Reconnect</div>
+            <div class="al-microcopy">Login otomatis & coba ulang jika putus</div>
+          </div>
+          <div class="al-advanced-item">
+            <div class="al-toggle-wrapper">
+              <label class="al-toggle">
+                <input type="checkbox" id="toggle-anti-blocking">
+                <span class="al-toggle-slider"></span>
+              </label>
+              <span class="al-toggle-status" data-for="toggle-anti-blocking">OFF</span>
+            </div>
+            <div class="al-advanced-label">Anti Blocking</div>
+            <div class="al-microcopy">Cegah pemblokiran oleh portal</div>
+          </div>
+          <div class="al-advanced-item">
+            <div class="al-toggle-wrapper">
+              <label class="al-toggle">
+                <input type="checkbox" id="toggle-random-hostname">
+                <span class="al-toggle-slider"></span>
+              </label>
+              <span class="al-toggle-status" data-for="toggle-random-hostname">OFF</span>
+            </div>
+            <div class="al-advanced-label">Random Hostname</div>
+            <div class="al-microcopy">Acak nama perangkat DHCP</div>
+          </div>
+          <div class="al-advanced-item">
+            <div class="al-toggle-wrapper">
+              <label class="al-toggle">
+                <input type="checkbox" id="toggle-notification">
+                <span class="al-toggle-slider"></span>
+              </label>
+              <span class="al-toggle-status" data-for="toggle-notification">OFF</span>
+            </div>
+            <div class="al-advanced-label">Kirim Notifikasi</div>
+            <div class="al-microcopy">Kirim notifikasi ke Telegram</div>
+          </div>
+        </div>
+
+<div id="conditional-input-container" class="al-conditional-input">
+  <div class="al-conditional-input-grid-5">
+    <div class="al-form-group">
+      <label>AUTO-LOGIN</label>
+      <input type="number" id="form-check-interval" class="al-input" placeholder="min: 30, max: 300" min="30" max="300" value="60">
+      <div class="al-microcopy">Interval daemon mengecek koneksi (detik)</div>
+    </div>
+    <div class="al-form-group">
+      <label>AUTO-RECONNECT</label>
+      <input type="number" id="form-reconnect-interval" class="al-input" placeholder="min: 5, max: 3600" min="5" max="3600" value="30">
+      <div class="al-microcopy">Jeda antar percobaan login ulang (detik)</div>
+    </div>
+    <div class="al-form-group">
+      <label>ANTI-BLOCKING</label>
+      <input type="number" id="form-antiblock-delay" class="al-input" placeholder="min: 1, max: 300" min="1" max="300" value="10">
+      <div class="al-microcopy">Delay sebelum login untuk hindari deteksi bot</div>
+    </div>
+    <div class="al-form-group">
+      <label>MAKSIMAL PERCOBAAN</label>
+      <input type="number" id="form-reconnect-retry" class="al-input" placeholder="min: 1, max: 100" min="1" max="100" value="5">
+      <div class="al-microcopy">Batas percobaan sebelum berhenti otomatis</div>
+    </div>
+    <div class="al-form-group">
+      <label>INTERVAL HOSTNAME</label>
+      <select id="form-hostname-interval" class="al-input">
+        <option value="86400">1 Hari</option>
+        <option value="604800">7 Hari</option>
+        <option value="2592000">30 Hari</option>
+        <option value="31536000">1 Tahun</option>
+      </select>
+      <div class="al-microcopy">Periode pergantian nama perangkat acak</div>
+    </div>
+  </div>
+</div>
+        <div id="notification-input-container" class="al-conditional-input">
+          <div class="al-notification-input-grid">
+            <div class="al-form-group">
+              <label>BOT TOKEN</label>
+              <input type="text" id="form-bot-token" class="al-input" placeholder="Masukkan Bot Token Telegram">
+            </div>
+            <div class="al-form-group">
+              <label>CHAT ID</label>
+              <input type="text" id="form-chat-id" class="al-input" placeholder="Masukkan Chat ID">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="al-divider"></div>
+
+      <div class="al-form-actions">
+        <button id="btn-back" class="al-btn al-btn-secondary">KEMBALI</button>
+        <div class="al-action-right">
+          <button id="btn-login" class="al-btn al-btn-login" type="button">LOGIN</button>
+          <button id="btn-save" class="al-btn al-btn-save" type="button">SIMPAN</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="saved-profiles-section">
+      <h3 class="al-card-title">Profil Tersimpan</h3>
+      <div class="al-table-info">
+        <span id="saved-profiles-count">0</span> Interface Tersimpan
+      </div>
+      <div class="al-table-wrapper">
+<table class="al-table" id="saved-profiles-table">
+  <thead>
+    <tr>
+      <th>PORTAL</th>
+      <th>INTERFACE</th>
+      <th>IP</th>
+      <th>AUTO-LOGIN</th>
+      <th>ANTI-BLOCK</th>
+      <th>HOSTNAME</th>
+      <th>NOTIF</th>
+      <th>STATUS</th>
+      <th>AKSI</th>
+    </tr>
+  </thead>
+  <tbody id="saved-profiles-tbody"></tbody>
+</table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="tab-about" class="al-pane">
+  <div class="al-card">
+    <h3 class="al-card-title">Tentang Portal Manager</h3>
+    <div class="al-about-content">
+
+      <p><strong>Apa fungsi sistem ini?</strong></p>
+      <p>Portal Manager membantu router OpenWrt Anda untuk login otomatis ke halaman login WiFi publik (seperti @wifi.id, WMS, atau hotspot lainnya). Setelah Anda mengatur sekali, sistem akan menangani login ulang secara otomatis di latar belakang setiap kali koneksi terputus, tanpa perlu membuka browser atau mengetik password lagi.</p>
+
+      <hr class="al-about-divider">
+
+      <p><strong>Bagaimana cara memakainya dari awal?</strong></p>
+      <ol class="al-about-list">
+        <li><strong>CEK INTERFACE:</strong> Tekan tombol ini untuk memindai semua jaringan yang terhubung ke router. Sistem akan mendeteksi apakah ada halaman login (captive portal) di jaringan tersebut, lalu menampilkan hasilnya dalam bentuk tabel: tipe portal, nama interface, IP, MAC address, dan URL portal.</li>
+        <li><strong>PILIH INTERFACE:</strong> Klik tombol ini pada baris jaringan yang ingin Anda atur. Semua data hasil pemindaian (URL, MAC, parameter portal) akan otomatis terisi ke form di bawahnya.</li>
+        <li><strong>Lengkapi Data di Form:</strong> Isi username, password, dan sesuaikan pengaturan lain jika perlu (penjelasan detail ada di bagian bawah).</li>
+        <li><strong>LOGIN:</strong> Tekan tombol ini untuk mencoba login sekarang juga. Ini berguna untuk memastikan username dan password Anda benar sebelum disimpan. Jika berhasil, tombol akan berubah menjadi LOGOUT.</li>
+        <li><strong>SIMPAN:</strong> Setelah login berhasil, tekan tombol ini untuk menyimpan seluruh pengaturan ke router. Jika Anda mengaktifkan fitur Auto Login/Reconnect, sistem akan otomatis menjaga koneksi Anda tetap aktif, bahkan setelah router dimatikan dan dinyalakan kembali.</li>
+      </ol>
+
+      <hr class="al-about-divider">
+
+      <p><strong>Apa saja yang bisa diatur di form?</strong></p>
+      <ul class="al-about-list">
+        <li><strong>MAC Address:</strong> Anda bisa memakai MAC bawaan perangkat, atau menggantinya agar router terlihat sebagai perangkat lain. Pilih tipe perangkat (Android, Windows, Mac, Linux) untuk mendapatkan MAC dari vendor asli, atau tekan RANDOM untuk menghasilkan MAC acak. Tombol APPLY MAC akan menyimpan perubahan ke konfigurasi wireless router.</li>
+        <li><strong>URL Portal:</strong> Biasanya sudah terisi otomatis dari hasil pemindaian. Jika perlu diubah, Anda bisa mengeditnya langsung. Setiap kali URL berubah (baik karena diedit manual, ditekan Enter, atau diklik DETECT URL), sistem akan otomatis mengenali tipe portal berdasarkan path-nya (misalnya /login/, /loginjs/, /loginocs/, atau /wms/) dan menyesuaikan parameter yang diperlukan.</li>
+        <li><strong>Parameter Portal:</strong> Field seperti GW ID, Client MAC, WLAN, Session ID, dan IPC biasanya tidak perlu diisi manual karena diambil langsung dari URL portal. Field ini hanya muncul jika tipe portal memang memerlukannya.</li>
+        <li><strong>Login Method:</strong> Pilihan metode login (Standar, Komunitas, ISP, Wico) yang menentukan bagaimana username Anda akan diformat sebelum dikirim ke server. Opsi ini hanya aktif untuk tipe portal yang mendukung.</li>
+        <li><strong>Username &amp; Password:</strong> Kredensial yang akan dikirim ke server portal saat login.</li>
+      </ul>
+
+      <hr class="al-about-divider">
+
+      <p><strong>Apa fungsi tombol-tombol di tabel Profil Tersimpan?</strong></p>
+      <ul class="al-about-list">
+        <li><strong>EDIT:</strong> Membuka profil yang sudah tersimpan ke dalam form. Anda bisa mengubah username, password, atau pengaturan lain. Setelah diubah, tombol SIMPAN akan berubah menjadi UPDATE.</li>
+        <li><strong>UPDATE:</strong> Menyimpan perubahan ke profil yang sudah ada. Data lama akan ditimpa dengan data baru.</li>
+        <li><strong>HAPUS:</strong> Menghapus profil secara permanen dari router. Sistem akan berhenti menjaga koneksi untuk profil tersebut.</li>
+      </ul>
+
+      <hr class="al-about-divider">
+
+      <p><strong>Apa itu LOGOUT?</strong></p>
+      <p>Tombol ini hanya muncul setelah Anda berhasil login. Fungsinya untuk memutus sesi aktif di server portal. Gunakan ini jika Anda ingin berhenti menggunakan jaringan tersebut tanpa menghapus profil.</p>
+
+      <hr class="al-about-divider">
+
+      <p><strong>Penjelasan Fitur Lanjutan (Advanced Settings)</strong></p>
+      <ul class="al-about-list">
+        <li><strong>Auto Login/Reconnect:</strong> Mengaktifkan sistem penjaga koneksi. Anda bisa mengatur: Interval Cek (berapa detik sistem mengecek koneksi, rentang 30-300 detik), Interval Reconnect (jeda antar percobaan login ulang), dan Maksimal Percobaan (batas retry sebelum sistem berhenti dan menunggu perhatian Anda).</li>
+        <li><strong>Anti Blocking:</strong> Memberikan jeda waktu sebelum mencoba login ulang. Tujuannya agar server portal tidak mencurigai router Anda melakukan request terlalu agresif.</li>
+        <li><strong>Random Hostname:</strong> Mengganti nama router secara berkala (setiap 1 hari, 7 hari, 30 hari, atau 1 tahun). Ini membuat router terlihat sebagai perangkat baru di mata server portal, berguna untuk menghindari pembatasan kecepatan berbasis identitas perangkat.</li>
+        <li><strong>Kirim Notifikasi:</strong> Mengirim pesan ke Telegram Anda saat terjadi peristiwa penting: login berhasil, login gagal berulang, atau maksimal percobaan tercapai. Anda perlu mengisi Bot Token dan Chat ID Telegram.</li>
+      </ul>
+
+      <hr class="al-about-divider">
+
+      <p><strong>Keamanan &amp; Privasi</strong></p>
+      <p>Seluruh data (username, password, token, parameter portal) disimpan lokal di router Anda. Tidak ada data yang dikirim ke server pihak ketiga, kecuali notifikasi yang secara sadar Anda aktifkan ke akun Telegram Anda sendiri.</p>
+
+      <p class="al-about-footer">
+        <strong>Versi Sistem:</strong> 2.0.0<br>
+        <strong>Lingkungan:</strong> OpenWrt 21.02+ dengan LuCI
+      </p>
+
+    </div>
+  </div>
+</div>
+
+<div id="mac-modal" class="al-modal">
+  <div class="al-modal-overlay"></div>
+  <div class="al-modal-content">
+    <h3 id="modal-title">Konfirmasi</h3>
+    <p id="modal-message"></p>
+    <div class="al-modal-actions">
+      <button id="modal-btn-cancel" class="al-btn">TIDAK</button>
+      <button id="modal-btn-confirm" class="al-btn al-btn-pilih">YA</button>
+    </div>
+  </div>
+</div>
+</div>
+<script src="<%=resource%>/login_options.js"></script>
+<script src="<%=resource%>/portal.js"></script>
+<%+footer%>

@@ -1,0 +1,75 @@
+#!/bin/sh /etc/rc.common
+# portal_autologin
+
+START=99
+STOP=01
+
+USE_PROCD=1
+
+start_service() {
+    logger -t portal "[INFO] [portal_autologin] [SYSTEM] | Memulai daemon auto-login"
+    procd_open_instance
+    procd_set_param command /usr/lib/portal/autologin.sh
+    procd_set_param stdout 1
+    procd_set_param stderr 1
+    procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5}
+    procd_close_instance
+    logger -t portal "[INFO] [portal_autologin] [SYSTEM] | Daemon auto-login berhasil dimulai"
+}
+
+stop_service() {
+    logger -t portal "[INFO] [portal_autologin] [SYSTEM] | Menghentikan daemon (mode targeted cleanup per-profil)"
+    local main_pid_file="/var/run/portal_autologin.pid"
+    if [ -f "$main_pid_file" ]; then
+        local main_pid=$(cat "$main_pid_file" 2>/dev/null)
+        if [ -n "$main_pid" ] && kill -0 "$main_pid" 2>/dev/null; then
+            logger -t portal "[INFO] [portal_autologin] [SYSTEM] | Mengirim SIGTERM ke Supervisor PID $main_pid"
+            kill -TERM "$main_pid" >/dev/null 2>&1
+            sleep 1
+            if kill -0 "$main_pid" 2>/dev/null; then
+                logger -t portal "[WARN] [portal_autologin] [SYSTEM] | Supervisor tidak merespon, mengirim SIGKILL"
+                kill -KILL "$main_pid" >/dev/null 2>&1
+            fi
+        fi
+        rm -f "$main_pid_file" >/dev/null 2>&1
+    fi
+
+    for lock_dir in /tmp/portal_autologin_*.lifecycle.lock; do
+        [ -d "$lock_dir" ] || continue
+        local pid_file="$lock_dir/pid"
+        if [ -f "$pid_file" ]; then
+            local child_pid=$(cat "$pid_file" 2>/dev/null)
+            if [ -n "$child_pid" ] && kill -0 "$child_pid" 2>/dev/null; then
+                local profile_name=$(basename "$lock_dir" | sed 's/^portal_autologin_//; s/\.lifecycle\.lock$//')
+                logger -t portal "[INFO] [portal_autologin] [$profile_name] | Menghentikan child process PID $child_pid"
+                kill -TERM "$child_pid" >/dev/null 2>&1
+                sleep 1
+                if kill -0 "$child_pid" 2>/dev/null; then
+                    kill -KILL "$child_pid" >/dev/null 2>&1
+                fi
+            fi
+        fi
+        rm -rf "$lock_dir" >/dev/null 2>&1
+    done
+
+    for lock_dir in /tmp/portal_autologin_*.exec.lock; do
+        [ -d "$lock_dir" ] || continue
+        rm -rf "$lock_dir" >/dev/null 2>&1
+    done
+
+    for lock_dir in /tmp/portal_profile_*.lock; do
+        [ -d "$lock_dir" ] || continue
+        rm -rf "$lock_dir" >/dev/null 2>&1
+    done
+
+    rm -rf /tmp/portal_detect.lock >/dev/null 2>&1
+    
+    logger -t portal "[INFO] [portal_autologin] [SYSTEM] | Proses pembersihan targeted selesai."
+}
+
+reload_service() {
+    logger -t portal "[INFO] [portal_autologin] [SYSTEM] | Reload daemon (graceful restart)"
+    stop
+    sleep 1
+    start
+}

@@ -1,0 +1,51 @@
+#!/bin/sh /etc/rc.common
+# /etc/init.d/mwan3_watchdog
+
+START=96
+STOP=01
+USE_PROCD=1
+PROG="/usr/sbin/mwan3_watchdog.sh"
+
+start_service() {
+    local enabled auto_enable rc_link logger_tag
+
+    logger_tag=$(uci -q get mwan3_watchdog.globals.logger_tag 2>/dev/null)
+    [ -n "$logger_tag" ] || logger_tag="mwan3_watchdog"
+
+    enabled=$(uci -q get mwan3_watchdog.globals.enabled 2>/dev/null)
+    if [ "$enabled" = "0" ]; then
+        logger -t "$logger_tag" "INFO | mwan3_watchdog | [SISTEM] Watchdog nonaktif" >/dev/null 2>&1
+        return 0
+    fi
+
+    auto_enable=$(uci -q get mwan3_watchdog.globals.auto_enable 2>/dev/null)
+    [ "$auto_enable" = "1" ] || auto_enable=0
+
+    rc_link="/etc/rc.d/S${START}mwan3_watchdog"
+
+    if [ "$auto_enable" = "1" ] && [ ! -e "$rc_link" ]; then
+        logger -t "$logger_tag" "INFO | mwan3_watchdog | [SISTEM] Auto enable: $rc_link" >/dev/null 2>&1
+        /etc/init.d/mwan3_watchdog enable >/dev/null 2>&1
+    fi
+
+    logger -t "$logger_tag" "INFO | mwan3_watchdog | [SISTEM] Mulai: $PROG" >/dev/null 2>&1
+
+    procd_open_instance
+    procd_set_param command "$PROG"
+    procd_set_param respawn "${respawn_threshold:-3600}" "${respawn_timeout:-5}" "${respawn_retry:-5}"
+    procd_set_param term_timeout 5
+    procd_set_param stdout 1
+    procd_set_param stderr 1
+    procd_close_instance
+}
+
+stop_service() {
+    local logger_tag
+    logger_tag=$(uci -q get mwan3_watchdog.globals.logger_tag 2>/dev/null)
+    [ -n "$logger_tag" ] || logger_tag="mwan3_watchdog"
+    logger -t "$logger_tag" "INFO | mwan3_watchdog | [SISTEM] Stop: $PROG" >/dev/null 2>&1
+}
+
+service_triggers() {
+    procd_add_reload_trigger "mwan3"
+}

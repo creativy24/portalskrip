@@ -1,0 +1,9 @@
+# Format: portal_type|path_url|script_name
+# Landing script mapping untuk captive portal
+# Kunci utama: portal_type + path_url (Single Source of Truth)
+# Baris kosong dan baris diawali # diabaikan
+
+wms|wms|wms.sh
+@wifi.id|loginocs|classic.sh
+@wifi.id|loginjs|loginjs.sh
+hotspot|login_hotspot|hotspot.sh
